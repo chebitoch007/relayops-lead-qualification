@@ -1,0 +1,1196 @@
+{
+  "name": "RelayOps \u2014 Lead Qualification & Booking Automation",
+  "nodes": [
+    {
+      "id": "547efd20-c4e8-4d7d-b26c-2ce643e328ea",
+      "name": "Format Error Entry",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        760
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "logType",
+              "value": "workflow_error"
+            },
+            {
+              "name": "leadId",
+              "value": "={{$json.leadId || $json.body?.leadId || 'unknown'}}"
+            },
+            {
+              "name": "errorMessage",
+              "value": "={{$json.error?.message || $json.error || 'Unknown error'}}"
+            },
+            {
+              "name": "failedNode",
+              "value": "={{$json.error?.node?.name || 'unknown'}}"
+            },
+            {
+              "name": "occurredAt",
+              "value": "={{$now.toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Normalizes whatever failed upstream into one structured shape before it's logged. n8n auto-populates $json.error on error-output items with details about the failure and the node that threw it.",
+      "notesInFlow": true
+    },
+    {
+      "id": "48cba548-67b3-40a6-a741-039e19fb82da",
+      "name": "Send Error To Logging Service (Placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1940,
+        760
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placeholder-logging.example.com/v1/errors",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "PLACEHOLDER ENDPOINT \u2014 swap for a real error sink before going to production. Good options: Sentry (POST to your DSN's envelope endpoint), Datadog Logs API, or simplest of all, a Slack Incoming Webhook URL posting `{{$json.errorMessage}}` to an #alerts channel. Retry is intentionally NOT configured here \u2014 an error-logging call that itself keeps failing shouldn't loop.",
+      "notesInFlow": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": false
+    },
+    {
+      "id": "59540347-81b4-4794-8137-1f226f1b88a6",
+      "name": "Error Logged",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        760
+      ],
+      "parameters": {},
+      "notes": "Terminal node \u2014 confirms the error branch completed. Nothing downstream depends on this.",
+      "notesInFlow": false
+    },
+    {
+      "id": "73512898-8a27-430e-8e7a-0f5b3501f4d1",
+      "name": "Error Handling Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        600
+      ],
+      "parameters": {
+        "content": "## Shared Error Log\n\nEvery HTTP Request node in this workflow has `onError: continueErrorOutput` set, so a failed call doesn't stop the execution \u2014 it routes here instead via the node's second (error) output pin. All branches funnel into this one place so there's a single structured error trail rather than scattered failure handling.\n\nRetry: each HTTP Request node retries 3 times with a **fixed** delay (n8n's built-in retry is fixed-delay, not exponential \u2014 see each node's notes for how to add real exponential backoff via a Code node if a client needs it).",
+        "height": 140,
+        "width": 560,
+        "color": 5
+      }
+    },
+    {
+      "id": "3ea2a073-cb36-4146-9ad9-dbf6a89583a6",
+      "name": "Lead Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        280
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "relayops/lead-intake",
+        "responseMode": "onReceived",
+        "responseData": "success",
+        "options": {}
+      },
+      "notes": "Receives the lead payload from src/app/api/leads/route.ts right after its Google Sheets CRM write. responseMode is 'onReceived' so this responds 200 immediately on receipt \u2014 the Next.js call is fire-and-forget, it does not wait for the branches below to finish.\n\nTO CONFIGURE: set this node's Authentication to 'Header Auth' and create a credential whose header name is 'x-n8n-secret' and value matches N8N_WEBHOOK_SECRET in the Next.js app's environment \u2014 otherwise anyone who finds this URL can post fake leads into the workflow.\n\nAfter import, copy this node's Production URL into N8N_WEBHOOK_URL in the Next.js app's .env.",
+      "notesInFlow": true,
+      "webhookId": "46cb0266-55ff-444b-a751-ae035505cd09"
+    },
+    {
+      "id": "dc245b5a-a474-42f1-acb2-e51b4b11b53b",
+      "name": "Validate & Normalize Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        60,
+        280
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "leadId",
+              "value": "={{$json.body.leadId}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.body.status}}"
+            },
+            {
+              "name": "name",
+              "value": "={{$json.body.name}}"
+            },
+            {
+              "name": "email",
+              "value": "={{$json.body.email}}"
+            },
+            {
+              "name": "company",
+              "value": "={{$json.body.company}}"
+            },
+            {
+              "name": "score",
+              "value": "={{$json.body.score}}"
+            },
+            {
+              "name": "bookingUrl",
+              "value": "={{$json.body.bookingUrl || ''}}"
+            },
+            {
+              "name": "monthlyRevenue",
+              "value": "={{$json.body.monthlyRevenue}}"
+            },
+            {
+              "name": "monthlyLeadVolume",
+              "value": "={{$json.body.monthlyLeadVolume}}"
+            },
+            {
+              "name": "recommendedNextStep",
+              "value": "={{$json.body.recommendedNextStep}}"
+            },
+            {
+              "name": "receivedAt",
+              "value": "={{$now.toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Flattens the webhook's nested `body` wrapper into top-level fields so every downstream node can reference e.g. {{$json.leadId}} directly instead of {{$json.body.leadId}}. This is the only node that needs to change if the Next.js payload shape ever changes.",
+      "notesInFlow": true
+    },
+    {
+      "id": "5e20bd39-c0c6-4d6c-af77-5a4f92d7f9c2",
+      "name": "Is Qualified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        320,
+        280
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "operation": "equal",
+              "value2": "qualified"
+            }
+          ]
+        }
+      },
+      "notes": "Routes the qualified branch. False side continues checking maybe_qualified next.",
+      "notesInFlow": true
+    },
+    {
+      "id": "a8bd729a-3759-4572-ae55-6de8daf5c838",
+      "name": "Is Maybe-Qualified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        320,
+        460
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "operation": "equal",
+              "value2": "maybe_qualified"
+            }
+          ]
+        }
+      },
+      "notes": "Only reached if Is Qualified? was false. False side continues to Is Not-Qualified?.",
+      "notesInFlow": true
+    },
+    {
+      "id": "bbcd64c0-18d8-42a4-a4b0-220d105a5d2e",
+      "name": "Is Not-Qualified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        320,
+        640
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "operation": "equal",
+              "value2": "not_qualified"
+            }
+          ]
+        }
+      },
+      "notes": "Only reached if both prior checks were false. False side means an unrecognized status value reached this workflow.",
+      "notesInFlow": true
+    },
+    {
+      "id": "f0eab316-4d75-4096-942d-e5d989ce0602",
+      "name": "Unexpected Status - Tag For Error Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        580,
+        900
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "error",
+              "value": "Unrecognized qualification status reached the n8n workflow"
+            },
+            {
+              "name": "leadId",
+              "value": "={{$json.leadId}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Reached only if qualification.status was something other than qualified / maybe_qualified / not_qualified \u2014 which should be impossible given the QUALIFICATION_STATUSES enum in src/types, but this exists so a future change to that enum fails loudly here instead of silently dropping leads.",
+      "notesInFlow": true
+    },
+    {
+      "id": "27424602-eaca-4719-97bb-f25b0e39d678",
+      "name": "Qualified Branch Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        580,
+        40
+      ],
+      "parameters": {
+        "content": "## Qualified Branch\n\nCreates the internal task and logs the booking link (already issued by the Next.js route before this workflow even fired). **Does not** wait inline for the booking to happen \u2014 see 'Calendly Booking Webhook' trigger lower in this canvas for why, and how the two connect via leadId.",
+        "height": 140,
+        "width": 420,
+        "color": 4
+      }
+    },
+    {
+      "id": "769ceea8-fef3-44d9-b354-d53df0ca5ff8",
+      "name": "Annotate Qualified Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        580,
+        220
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "branch",
+              "value": "qualified"
+            },
+            {
+              "name": "taskTitle",
+              "value": "={{'Discovery call lead: ' + $json.company}}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "df41265e-7405-454b-959e-f7358c994e59",
+      "name": "Create Internal Task (Placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placeholder-task-manager.example.com/v1/tasks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { title: $json.taskTitle, description: 'Lead: ' + $json.name + ' (' + $json.email + ') \u2014 score ' + $json.score + '/10. Next step: ' + $json.recommendedNextStep, dueInDays: 1, leadId: $json.leadId } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "PLACEHOLDER ENDPOINT \u2014 replace with the real task tool:\n  Asana:    POST https://app.asana.com/api/1.0/tasks (Bearer token auth)\n  Trello:   POST https://api.trello.com/1/cards?idList=<LIST_ID> (key+token query params)\n  ClickUp:  POST https://api.clickup.com/api/v2/list/<LIST_ID>/task (Bearer token)\nWhichever you pick, set its credential on this node and update the URL/body to match that API's task-creation shape.",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "40089a16-8c10-4091-8ea8-fd9f772bc321",
+      "name": "Log Booking Link Issued",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        220
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "logType",
+              "value": "booking_link_issued"
+            },
+            {
+              "name": "leadId",
+              "value": "={{$json.leadId}}"
+            },
+            {
+              "name": "bookingUrl",
+              "value": "={{$json.bookingUrl}}"
+            },
+            {
+              "name": "issuedAt",
+              "value": "={{$now.toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Structured record that a booking link went out for this lead, viewable in this execution's run data. Not sent anywhere externally by default \u2014 wire this node's output to a logging HTTP node (same pattern as the shared error log) if you want it durable outside n8n's own execution history.",
+      "notesInFlow": true
+    },
+    {
+      "id": "9752648f-f209-46bf-bb83-62e6cf87ee3d",
+      "name": "Qualified Lead Processed",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        220
+      ],
+      "parameters": {},
+      "notes": "Terminal node for this execution. The booking outcome (booked/cancelled) is NOT handled here \u2014 it arrives later, in a separate execution, via the 'Calendly Booking Webhook' trigger below, matched back to this lead by leadId. See that trigger's notes for why it has to be a separate trigger rather than a continuation of this one.",
+      "notesInFlow": false
+    },
+    {
+      "id": "b3c8b4be-b121-4039-a581-5b8592fc95c9",
+      "name": "Maybe-Qualified Branch Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        580,
+        420
+      ],
+      "parameters": {
+        "content": "## Maybe-Qualified Branch\n\nNurture + manual review queue, then a 2-business-day wait before a follow-up reminder fires.",
+        "height": 120,
+        "width": 420,
+        "color": 7
+      }
+    },
+    {
+      "id": "ce0b0c8f-77ac-4de5-9a2e-92a766a8e482",
+      "name": "Annotate Maybe-Qualified Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        580,
+        560
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "branch",
+              "value": "maybe_qualified"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "2ada32a5-38ca-4781-ab91-9dd28e1414d3",
+      "name": "Add To Nurture Sequence (Placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        500
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placeholder-nurture.example.com/v1/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { email: $json.email, name: $json.name, tag: 'relayops-maybe-qualified', leadId: $json.leadId } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "PLACEHOLDER ENDPOINT \u2014 replace with the real nurture/ESP tool:\n  Mailchimp:      POST https://<dc>.api.mailchimp.com/3.0/lists/<list_id>/members\n  ActiveCampaign: POST https://<account>.api-us1.com/api/3/contacts\n  Klaviyo:        POST https://a.klaviyo.com/api/profiles\nAdd this lead to whichever nurture sequence/list is appropriate for a not-yet-clear-cut fit.",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "f8296960-fa9e-4848-8f55-8d5a60137881",
+      "name": "Add To Manual Review Queue (Placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        500
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placeholder-review-queue.example.com/v1/queue-items",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { leadId: $json.leadId, name: $json.name, company: $json.company, score: $json.score, recommendedNextStep: $json.recommendedNextStep } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "PLACEHOLDER ENDPOINT \u2014 for most clients this ends up being a row in a dedicated 'Review Queue' Airtable base or Notion database rather than a generic API, since a human needs to actually look at it and act. Point this at whichever review surface the founder/team actually checks daily \u2014 a queue nobody looks at isn't a queue, it's a leak.",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "541c397a-c1f3-436a-aa09-88f599948f8b",
+      "name": "Wait 2 Business Days For Follow-Up",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        500
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "days"
+      },
+      "notes": "Pauses this execution for a fixed 48 hours. NOTE: n8n's Wait node counts calendar days, not business days \u2014 a lead that lands on a Friday afternoon will get followed up on Sunday, not the following Tuesday. For true business-day-aware scheduling, follow this with an IF node checking {{$now.weekday}} (1-5 = Mon-Fri) and looping back into another short Wait if it lands on a weekend. Left as a fixed 2-day wait here to keep the v1 workflow simple \u2014 flagging the gap rather than hiding it.",
+      "notesInFlow": false
+    },
+    {
+      "id": "55f61779-877d-40b8-923a-b3d586d678f3",
+      "name": "Send Follow-Up Reminder (Placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        500
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placeholder-reminder.example.com/v1/reminders",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { leadId: $json.leadId, assignee: 'founder', message: 'Follow up with ' + $json.name + ' at ' + $json.company + ' \u2014 maybe-qualified, 2 days have passed.' } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "PLACEHOLDER ENDPOINT \u2014 realistic swaps: a Slack message via a Slack Incoming Webhook (simplest), or a task on the same tool wired up in 'Create Internal Task' above so all follow-ups land in one place.",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "77575fd5-8180-41bd-9580-7046ef91d0ea",
+      "name": "Maybe-Qualified Lead Processed",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        500
+      ],
+      "parameters": {},
+      "notes": "Terminal node for this branch.",
+      "notesInFlow": false
+    },
+    {
+      "id": "4de63622-9a60-481c-8646-b2c402c04959",
+      "name": "Not-Qualified Branch Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        580,
+        760
+      ],
+      "parameters": {
+        "content": "## Not-Qualified Branch\n\nArchive only \u2014 the decline email was already sent directly by the Next.js route, so there's nothing further to automate here.",
+        "height": 100,
+        "width": 420,
+        "color": 3
+      }
+    },
+    {
+      "id": "96f6472f-f9ad-41be-ae2b-978f57111244",
+      "name": "Annotate Not-Qualified Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        580,
+        880
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "branch",
+              "value": "not_qualified"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "dba2413f-858c-4f56-8867-3e9dc7b6518b",
+      "name": "Archive Lead (Placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        880
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placeholder-archive.example.com/v1/leads/archive",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { leadId: $json.leadId, reason: 'not_qualified' } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "PLACEHOLDER ENDPOINT \u2014 in many real deployments this step is actually redundant: the Google Sheets CRM record already has status='not_qualified' from the Next.js write, which IS the archive. Keep this node only if the client wants leads physically moved to a separate sheet/tab, a different CRM pipeline stage, or removed from an active-leads view.",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "47717519-aca0-4244-a831-c8be57742e61",
+      "name": "Not-Qualified Lead Archived",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        880
+      ],
+      "parameters": {},
+      "notes": "Terminal node for this branch.",
+      "notesInFlow": false
+    },
+    {
+      "id": "15f09910-e253-451e-92ea-795f1372b1de",
+      "name": "Calendly Webhook Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        1080
+      ],
+      "parameters": {
+        "content": "## Why this is a separate trigger\n\nCalendly's webhook subscription needs ONE static URL configured once in Calendly's settings, covering every lead. n8n's Wait node CAN resume on a webhook call, but that resume URL is unique per execution \u2014 Calendly has no way to know which per-execution URL to call for which booking. So instead: this is its own always-on trigger that receives every Calendly event for every lead, pulls the leadId back out of Calendly's payload (it was embedded as utm_content when the booking link was built \u2014 see src/lib/booking/calendly.ts buildBookingLink()), and reports the outcome back to Next.js. The original lead-intake execution above has already finished by the time this fires, often days later.",
+        "height": 200,
+        "width": 600,
+        "color": 4
+      }
+    },
+    {
+      "id": "64d6286c-a19f-46c2-b95e-e9876c9e1714",
+      "name": "Calendly Booking Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        1340
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "relayops/calendly-booking",
+        "responseMode": "onReceived",
+        "responseData": "success",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "notes": "TO CONFIGURE: in Calendly's webhook subscription settings, point the subscription URL at this node's Production URL, subscribed to the 'invitee.created' and 'invitee.canceled' events. Copy Calendly's signing key into this n8n instance's CALENDLY_WEBHOOK_SIGNING_KEY environment variable (same name as the Next.js app's env var, for consistency \u2014 they can hold the same value).\n\n'rawBody: true' is enabled because signature verification needs the exact unparsed request body bytes, not the JSON-parsed version.",
+      "notesInFlow": true,
+      "webhookId": "5d55e2ca-8045-41e5-ae10-db90248a07dc"
+    },
+    {
+      "id": "2efed445-35b9-476a-aa3a-76c369818d87",
+      "name": "Verify Calendly Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        1340
+      ],
+      "parameters": {
+        "jsCode": "// Verifies Calendly's webhook signature.\n// Header format: 'Calendly-Webhook-Signature: t=<timestamp>,v1=<hex-hmac>'\n// Signed payload is the string '<timestamp>.<rawBody>', HMAC-SHA256'd with\n// the signing key from Calendly's webhook subscription settings.\n//\n// NOTE ON n8n VERSIONS: this reads the raw body from the binary property\n// n8n's Webhook node produces when 'Raw Body' is enabled. The exact\n// property path (here: $binary.data) has shifted across n8n releases \u2014\n// if this throws, open the Webhook node's output in the n8n UI, find\n// where the raw body actually landed, and adjust the path below.\n\nconst crypto = require('crypto');\n\nconst signingKey = $env.CALENDLY_WEBHOOK_SIGNING_KEY;\nconst sigHeader = $input.item.json.headers['calendly-webhook-signature'];\n\nlet signatureValid = false;\nlet reason = '';\n\nif (!signingKey) {\n  reason = 'CALENDLY_WEBHOOK_SIGNING_KEY is not set on this n8n instance';\n} else if (!sigHeader) {\n  reason = 'Missing Calendly-Webhook-Signature header';\n} else {\n  try {\n    const parts = Object.fromEntries(\n      sigHeader.split(',').map((p) => p.split('=').map((s) => s.trim())),\n    );\n    const rawBodyBuffer = $input.item.binary?.data?.data\n      ? Buffer.from($input.item.binary.data.data, 'base64')\n      : Buffer.from(JSON.stringify($input.item.json.body));\n    const signedPayload = `${parts.t}.${rawBodyBuffer.toString('utf8')}`;\n    const expected = crypto\n      .createHmac('sha256', signingKey)\n      .update(signedPayload)\n      .digest('hex');\n    signatureValid = crypto.timingSafeEqual(\n      Buffer.from(expected, 'hex'),\n      Buffer.from(parts.v1 || '', 'hex'),\n    );\n    if (!signatureValid) reason = 'Signature mismatch';\n  } catch (err) {\n    reason = `Verification error: ${err.message}`;\n  }\n}\n\nreturn [{ json: { ...$input.item.json.body, signatureValid, signatureFailureReason: reason } }];\n"
+      },
+      "notes": "Computes and checks the HMAC signature so this endpoint can't be spoofed into reporting fake bookings. See the in-code comment about n8n-version-specific raw-body access if this needs adjustment after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "ef013a28-3642-49d0-930b-4114448b5db4",
+      "name": "Signature Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        300,
+        1340
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.signatureValid}}",
+              "operation": "equal",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "notes": "Only continues to update Next.js if the HMAC check passed.",
+      "notesInFlow": true
+    },
+    {
+      "id": "6934248a-a5ea-4485-ae39-f52be146e8a9",
+      "name": "Log Invalid Calendly Signature",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1460
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "error",
+              "value": "={{'Calendly webhook signature check failed: ' + $json.signatureFailureReason}}"
+            },
+            {
+              "name": "leadId",
+              "value": "={{$json.payload?.tracking?.utm_content || 'unknown'}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Routes signature failures into the shared error log instead of silently dropping them.",
+      "notesInFlow": true
+    },
+    {
+      "id": "e09600ab-0e4a-48bb-8f28-95800561b433",
+      "name": "Extract Lead ID & Booking Status",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1280
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "leadId",
+              "value": "={{$json.payload?.tracking?.utm_content || ''}}"
+            },
+            {
+              "name": "bookingStatus",
+              "value": "={{$json.event === 'invitee.canceled' ? 'cancelled' : 'booked'}}"
+            },
+            {
+              "name": "bookingUrl",
+              "value": "={{$json.payload?.scheduled_event?.location?.join_url || $json.payload?.uri || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Pulls the lead id back out of Calendly's tracking.utm_content (set when the booking link was built \u2014 see buildBookingLink() in src/lib/booking/calendly.ts) and maps Calendly's event name to our bookingStatus vocabulary ('booked' | 'cancelled').",
+      "notesInFlow": true
+    },
+    {
+      "id": "8966daa5-62fa-49e1-b89a-fa7b7bc34531",
+      "name": "Notify Next.js \u2014 Update Booking Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        1280
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.RELAYOPS_APP_URL}}/api/webhooks/n8n",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-n8n-secret",
+              "value": "={{$env.N8N_WEBHOOK_SECRET}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { leadId: $json.leadId, bookingStatus: $json.bookingStatus, bookingUrl: $json.bookingUrl } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "Calls back into the Next.js app's POST /api/webhooks/n8n, which patches the CrmRecord's bookingStatus (and flips status to 'booked' when applicable \u2014 see that route's handler). TO CONFIGURE: set RELAYOPS_APP_URL (e.g. https://your-app.vercel.app, no trailing slash) as an environment variable on this n8n instance.",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "6879f531-aea5-4c0f-a505-84309925f465",
+      "name": "Booking Status Synced",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        1280
+      ],
+      "parameters": {},
+      "notes": "Terminal node \u2014 confirms Next.js's CRM record now reflects the real booking outcome.",
+      "notesInFlow": false
+    }
+  ],
+  "connections": {
+    "Format Error Entry": {
+      "main": [
+        [
+          {
+            "node": "Send Error To Logging Service (Placeholder)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Error To Logging Service (Placeholder)": {
+      "main": [
+        [
+          {
+            "node": "Error Logged",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize Payload": {
+      "main": [
+        [
+          {
+            "node": "Is Qualified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Qualified?": {
+      "main": [
+        [
+          {
+            "node": "Annotate Qualified Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Maybe-Qualified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Maybe-Qualified?": {
+      "main": [
+        [
+          {
+            "node": "Annotate Maybe-Qualified Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Not-Qualified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Not-Qualified?": {
+      "main": [
+        [
+          {
+            "node": "Annotate Not-Qualified Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unexpected Status - Tag For Error Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unexpected Status - Tag For Error Log": {
+      "main": [
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annotate Qualified Lead": {
+      "main": [
+        [
+          {
+            "node": "Create Internal Task (Placeholder)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Internal Task (Placeholder)": {
+      "main": [
+        [
+          {
+            "node": "Log Booking Link Issued",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Booking Link Issued": {
+      "main": [
+        [
+          {
+            "node": "Qualified Lead Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annotate Maybe-Qualified Lead": {
+      "main": [
+        [
+          {
+            "node": "Add To Nurture Sequence (Placeholder)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add To Nurture Sequence (Placeholder)": {
+      "main": [
+        [
+          {
+            "node": "Add To Manual Review Queue (Placeholder)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add To Manual Review Queue (Placeholder)": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 Business Days For Follow-Up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 Business Days For Follow-Up": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-Up Reminder (Placeholder)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow-Up Reminder (Placeholder)": {
+      "main": [
+        [
+          {
+            "node": "Maybe-Qualified Lead Processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annotate Not-Qualified Lead": {
+      "main": [
+        [
+          {
+            "node": "Archive Lead (Placeholder)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archive Lead (Placeholder)": {
+      "main": [
+        [
+          {
+            "node": "Not-Qualified Lead Archived",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendly Booking Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Calendly Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Calendly Signature": {
+      "main": [
+        [
+          {
+            "node": "Signature Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signature Valid?": {
+      "main": [
+        [
+          {
+            "node": "Extract Lead ID & Booking Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Invalid Calendly Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Invalid Calendly Signature": {
+      "main": [
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Lead ID & Booking Status": {
+      "main": [
+        [
+          {
+            "node": "Notify Next.js \u2014 Update Booking Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Next.js \u2014 Update Booking Status": {
+      "main": [
+        [
+          {
+            "node": "Booking Status Synced",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

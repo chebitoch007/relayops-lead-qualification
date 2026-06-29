@@ -67,8 +67,8 @@ Both CRM and email follow the same shape:
    place that branches on which provider is active, driven by env vars
    (`CRM_PROVIDER`, `EMAIL_PROVIDER`).
 
-Business logic — API routes, the qualification service, the eventual n8n
-workflow triggers — depends only on the interface. Migrating from Google
+Business logic — API routes, the qualification service, the n8n workflow
+triggers — depends only on the interface. Migrating from Google
 Sheets to HubSpot means: write `HubspotCrmAdapter extends UnimplementedCrmAdapter`
 with real `createRecord`/`updateRecord`/`getRecord` methods, swap it in for
 the stub in `crm/index.ts`, set `CRM_PROVIDER=hubspot`. No route handler
@@ -87,17 +87,38 @@ POST /api/leads
   │  3. buildBookingLink() if qualified → Calendly URL with lead id/name/email
   │  4. Flatten Lead + QualificationResult + booking info into a CrmRecord
   │  5. getCrmAdapter().createRecord() → persists it
+  │  6. Send lead + founder emails directly (non-blocking, see lib/email)
+  │  7. Fire a non-blocking webhook to n8n if N8N_WEBHOOK_URL is set
   ▼
-n8n workflow (triggered on CRM write — build phase, not yet implemented)
+n8n workflow (see /n8n) — receives the webhook from step 7 above
   │  Branches on qualification.status:
-  │    qualified       → founder email + internal task (booking link already issued)
-  │    maybe_qualified  → nurture sequence + manual review queue
-  │    not_qualified    → helpful response email + archive
+  │    qualified       → internal task created, booking link logged
+  │    maybe_qualified  → nurture sequence + manual review queue + 2-day follow-up
+  │    not_qualified    → archive (often redundant — CRM record already reflects this)
   ▼
-POST /api/webhooks/n8n
-     n8n reports back bookingStatus / bookingUrl → CRM record patched.
+  (the qualified-branch execution ends here — it does NOT wait inline for a
+   booking; that arrives later, in a separate execution, from a second
+   trigger fed by Calendly's own webhook)
+        ⋮  days later, when the lead actually books or cancels  ⋮
+Calendly fires invitee.created / invitee.canceled
+  ▼
+n8n's "Calendly Booking Webhook" trigger
+  │  Verifies the HMAC signature, extracts leadId from
+  │  payload.tracking.utm_content (embedded by buildBookingLink()),
+  │  maps the event to bookingStatus: 'booked' | 'cancelled'
+  ▼
+POST /api/webhooks/n8n  (header: x-n8n-secret)
+     Patches the CrmRecord's bookingStatus / bookingUrl.
      A bookingStatus of "booked" also flips the lead's overall `status`.
 ```
+
+The leads route and the n8n workflow talk to each other in **both
+directions**: Next.js → n8n right after the CRM write (step 7 above), and
+n8n → Next.js much later via `/api/webhooks/n8n`, once Calendly reports an
+actual booking outcome. Nothing in between is synchronous — the lead route
+returns its HTTP response without waiting on n8n at all, and the
+Calendly-triggered update can land anywhere from minutes to days after the
+original submission.
 
 ## Why qualification logic lives in `lib/ai`, not in the route handler
 

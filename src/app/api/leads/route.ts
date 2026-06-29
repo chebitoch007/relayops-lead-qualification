@@ -26,6 +26,13 @@ import type { CrmRecord, Lead, LeadInput, LeadStatus } from '@/types';
  * need data already in hand by this point, and are intentionally
  * non-blocking — a failed send is logged but never fails the HTTP response;
  * the CRM record remains the source of truth regardless.
+ *
+ * After the CRM write and emails, this route also fires a fire-and-forget
+ * webhook to n8n (see /n8n) for everything downstream that genuinely
+ * benefits from a visual workflow rather than more route code: internal
+ * task creation, nurture/review-queue routing, and — via a separate n8n
+ * trigger fed by Calendly's own webhook — booking-status updates that
+ * eventually land back here through POST /api/webhooks/n8n.
  */
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -150,6 +157,37 @@ export async function POST(request: NextRequest) {
     );
   } catch (err) {
     console.error('Failed to send founder notification email', err);
+  }
+
+  // Hands the lead off to the n8n workflow (see /n8n) for the downstream
+  // automation this route doesn't do itself: internal task creation,
+  // nurture-sequence/manual-review-queue routing, and booking-status
+  // tracking via Calendly's webhook. Optional — N8N_WEBHOOK_URL is unset
+  // by default — and never allowed to affect this route's own response.
+  if (env.N8N_WEBHOOK_URL) {
+    try {
+      await fetch(env.N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(env.N8N_WEBHOOK_SECRET ? { 'x-n8n-secret': env.N8N_WEBHOOK_SECRET } : {}),
+        },
+        body: JSON.stringify({
+          leadId: lead.id,
+          status: qualification.status,
+          name: lead.name,
+          email: lead.email,
+          company: lead.company,
+          score: qualification.score,
+          bookingUrl: booking?.url,
+          monthlyRevenue: lead.monthlyRevenue,
+          monthlyLeadVolume: lead.monthlyLeadVolume,
+          recommendedNextStep: qualification.recommendedNextStep,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to notify n8n workflow', err);
+    }
   }
 
   return NextResponse.json(
