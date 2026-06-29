@@ -6,7 +6,7 @@ a human touching the inbox.
 
 ## Build status
 
-Phases 1–3 are complete: architecture scaffold, lead-capture UI + email
+Phases 1–4 are complete: architecture scaffold, lead-capture UI + email
 templates, and the n8n automation workflow. See
 [`docs/architecture.md`](docs/architecture.md) for the full design
 rationale. `npm run build`, `npx tsc --noEmit`, and `npx next lint` all
@@ -22,7 +22,7 @@ pass clean.
 | Email provider pattern + Gmail SMTP | ✅ Done (functional, wired into `/api/leads`) |
 | Lead + founder email templates | ✅ Done |
 | Lead capture UI | ✅ Done |
-| Booking (Calendly) | 🟡 Link builder done; webhook signature verification happens in the n8n workflow (see `/n8n`), not in the Next.js `calendly.ts` stub |
+| Booking (Calendly) | ✅ Done — link builder, plus signature-verified webhook handling via both the n8n workflow (`/n8n`) and a direct `/api/webhooks/calendly` route that works without n8n |
 | n8n workflow | ✅ Done (`/n8n/relayops-lead-qualification.json`) |
 | Founder notification module | ✅ Done |
 
@@ -54,6 +54,12 @@ actually send — `/api/leads` calls it directly.
 `N8N_WEBHOOK_URL` is optional. If unset, the route skips notifying n8n
 entirely (everything else still works). See [`n8n/README.md`](n8n/README.md)
 for the workflow itself.
+
+`CALENDLY_WEBHOOK_SIGNING_KEY` is optional but required if you want
+`/api/webhooks/calendly` (the direct, n8n-independent booking-completion
+path) to work — without it, that route's signature check throws a clear
+error and returns 401 on every call. Get the signing key from Calendly's
+webhook subscription settings when you create the subscription.
 
 Everything else (future CRM/email providers) has sane defaults or is
 gracefully unimplemented with a clear error if selected.
@@ -105,12 +111,13 @@ Resend/SendGrid (prod-ready) · Vercel
    `n8n/relayops-lead-qualification.json` with error handling, retries,
    labeled nodes, and the Calendly booking-webhook trigger. See
    [`n8n/README.md`](n8n/README.md).
-4. **Booking completion** (next) — the `verifyCalendlyWebhookSignature()`
-   stub in `src/lib/booking/calendly.ts` is currently unimplemented; signature
-   verification for Calendly events is handled inside the n8n workflow
-   instead (see `n8n/README.md`). This phase decides whether that Next.js
-   stub gets implemented too (e.g. for a future direct-webhook path that
-   bypasses n8n) or is removed as redundant, and closes out any remaining
-   booking-completion edge cases (e.g. rescheduled events, no-shows).
-5. **Demo assets** — screenshots, architecture/data-flow diagrams, Loom
+4. ~~**Booking completion**~~ — done (Phase 4). `verifyCalendlyWebhookSignature()`
+   in `src/lib/booking/calendly.ts` is now implemented (HMAC-SHA256, timing-safe
+   comparison, 5-minute replay window). A new direct path,
+   `src/app/api/webhooks/calendly/route.ts`, handles Calendly events
+   (`invitee.created`, `invitee.canceled`, `invitee_no_show.created`) without
+   requiring n8n to be running — see `docs/architecture.md` for how it
+   relates to the existing Calendly → n8n → Next.js path.
+5. **Demo assets** (next) — architecture diagram, data-flow diagram,
+   screenshots, Loom walkthrough script.
    script.

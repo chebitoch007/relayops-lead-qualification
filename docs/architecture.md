@@ -12,7 +12,9 @@ src/
 │   ├── api/
 │   │   ├── leads/             # POST — validate → qualify → route → persist
 │   │   ├── qualify/           # POST — standalone re-qualification (manual review queue)
-│   │   └── webhooks/n8n/      # POST — n8n pushes booking status back into the CRM
+│   │   └── webhooks/
+│   │       ├── n8n/           # POST — n8n pushes booking status back into the CRM
+│   │       └── calendly/      # POST — direct Calendly path, bypasses n8n entirely
 │   ├── page.tsx                # Lead capture form (UI build phase)
 │   └── success/page.tsx        # Post-submit confirmation
 ├── components/
@@ -119,6 +121,45 @@ actual booking outcome. Nothing in between is synchronous — the lead route
 returns its HTTP response without waiting on n8n at all, and the
 Calendly-triggered update can land anywhere from minutes to days after the
 original submission.
+
+### Two paths back from Calendly — and why both exist
+
+The booking-outcome path above goes Calendly → n8n → Next.js. There's also
+a second, direct path that skips n8n entirely:
+
+```
+Calendly fires invitee.created / invitee.canceled / invitee_no_show.created
+  ▼
+POST /api/webhooks/calendly  (header: calendly-webhook-signature)
+  │  verifyCalendlyWebhookSignature() — HMAC-SHA256 over the raw body,
+  │  using CALENDLY_WEBHOOK_SIGNING_KEY, rejecting timestamps >5 min old
+  ▼
+Extracts leadId from payload.tracking.utm_content (same field the n8n
+path reads), maps the event to bookingStatus: 'booked' | 'cancelled' | 'no_show'
+  ▼
+getCrmAdapter().updateRecord(leadId, patch)
+     Same patch shape as /api/webhooks/n8n: bookingStatus, and
+     status: 'booked' on confirmation. Unknown event types or a missing
+     leadId always return 200 (Calendly retries on non-2xx) — only a real
+     signature failure or a CRM write failure return a non-200.
+```
+
+Both paths **converge on the same CRM patch logic** — they just differ in
+who verifies the signature and who's in the loop:
+
+| | Calendly → n8n → Next.js | Calendly → Next.js directly |
+|---|---|---|
+| Signature verification | A Code node inside the n8n workflow | `verifyCalendlyWebhookSignature()` in `lib/booking/calendly.ts` |
+| Requires n8n running? | Yes | No |
+| Event types handled | `booked`, `cancelled` | `booked`, `cancelled`, `no_show` |
+
+A real deployment would point Calendly's webhook subscription at **one**
+of these, not both — pointing it at both would patch the same CRM record
+twice for the same event, which is harmless (the patch is idempotent) but
+pointless. The direct path exists so the booking-completion loop doesn't
+have a hard dependency on n8n being deployed and configured at all; n8n
+remains where the *other* automation (task creation, nurture sequences)
+lives regardless of which booking path is active.
 
 ## Why qualification logic lives in `lib/ai`, not in the route handler
 
