@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  RelayOps visual identity — dark navy + electric blue, Inter + JetBrains
+  Mono. Chosen for a B2B automation agency: the mono face is used narrowly
+  (field labels, status tags, the eyebrow) to read like a system/pipeline
+  log rather than a generic SaaS form, while Inter carries all real
+  reading content. See docs/architecture.md and the design rationale in
+  the lead-capture form component for how the signal-rail progress
+  indicator ties into this.
+*/
+
+@layer base {
+  :root {
+    /* Canvas / surfaces */
+    --background: 222 47% 5%;        /* #0A0E17 */
+    --foreground: 220 35% 96%;       /* #F1F4FB */
+
+    --card: 224 38% 10%;             /* #11172A */
+    --card-foreground: 220 35% 96%;
+
+    --popover: 224 38% 10%;
+    --popover-foreground: 220 35% 96%;
+
+    --surface-2: 224 33% 13%;        /* #161D33 — inputs */
+    --border: 228 30% 18%;           /* #232B45 */
+    --input: 228 30% 18%;
+
+    /* Brand */
+    --primary: 222 83% 56%;          /* #2F6FF0 electric blue */
+    --primary-foreground: 220 35% 98%;
+    --primary-bright: 222 100% 70%;  /* #5B8DFF hover/glow */
+
+    --secondary: 224 33% 13%;
+    --secondary-foreground: 220 35% 96%;
+
+    --muted: 224 33% 13%;
+    --muted-foreground: 224 18% 62%; /* #8B94B0 */
+
+    --accent: 224 33% 16%;
+    --accent-foreground: 220 35% 96%;
+
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 220 35% 98%;
+
+    --success: 160 70% 50%;          /* #34D399 emerald — qualified */
+    --success-foreground: 222 47% 5%;
+
+    --warning: 38 96% 56%;           /* #FBBF24 amber — maybe-qualified */
+    --warning-foreground: 222 47% 5%;
+
+    --ring: 222 83% 56%;
+
+    --radius: 0.625rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+  .font-mono-label {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    letter-spacing: 0.08em;
+  }
+}
