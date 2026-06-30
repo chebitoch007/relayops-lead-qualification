@@ -4,10 +4,22 @@ Flagship demo implementation for marketing agencies: capture inbound leads,
 qualify them with AI, route them by fit, and book discovery calls — without
 a human touching the inbox.
 
+## Demo
+
+A lead fills out a form → Gemini scores and routes it → qualified leads
+get a Calendly link and a founder gets notified, all within seconds, with
+no human touching the inbox until a call is actually worth having.
+
+- 🎥 [Loom walkthrough script](docs/loom-script.md) — what we say when
+  showing this to a prospective client
+- 🗺️ Full data-flow trace (form submit → booked call):
+  [`docs/diagrams/data-flow.svg`](docs/diagrams/data-flow.svg)
+
+![RelayOps system architecture — browser submits the lead form to the Next.js app, which calls Gemini for AI qualification, writes to Google Sheets as the CRM, sends email via Gmail SMTP, issues a Calendly booking link, and exchanges webhooks bidirectionally with the n8n automation workflow](docs/diagrams/architecture.svg)
+
 ## Build status
 
-Phases 1–4 are complete: architecture scaffold, lead-capture UI + email
-templates, and the n8n automation workflow. See
+**All five build phases complete. Production-ready.** See
 [`docs/architecture.md`](docs/architecture.md) for the full design
 rationale. `npm run build`, `npx tsc --noEmit`, and `npx next lint` all
 pass clean.
@@ -64,7 +76,7 @@ webhook subscription settings when you create the subscription.
 Everything else (future CRM/email providers) has sane defaults or is
 gracefully unimplemented with a clear error if selected.
 
-## Testing the backend right now (before the UI exists)
+## Testing the backend directly via curl
 
 ```bash
 curl -X POST http://localhost:3000/api/leads \
@@ -118,6 +130,38 @@ Resend/SendGrid (prod-ready) · Vercel
    (`invitee.created`, `invitee.canceled`, `invitee_no_show.created`) without
    requiring n8n to be running — see `docs/architecture.md` for how it
    relates to the existing Calendly → n8n → Next.js path.
-5. **Demo assets** (next) — architecture diagram, data-flow diagram,
-   screenshots, Loom walkthrough script.
-   script.
+5. ~~**Demo assets**~~ — done (Phase 5). Architecture diagram
+   (`docs/diagrams/architecture.svg`) and data-flow diagram
+   (`docs/diagrams/data-flow.svg`), both generated programmatically — see
+   `docs/diagrams/generate_*.py` to regenerate after a structural change.
+   Loom walkthrough script at [`docs/loom-script.md`](docs/loom-script.md).
+   Screenshots are placeholders pending a live demo instance — see
+   [Screenshots](#screenshots) below.
+
+All five phases are now complete. Remaining work is the kind that needs a
+real deployment to do meaningfully: capturing actual screenshots, running
+the n8n workflow against a live n8n instance for the first time (see the
+honesty note in [`n8n/README.md`](n8n/README.md) about that), and
+recording the actual Loom video from the script above.
+
+## Screenshots
+
+Captured from a live demo instance — not included in this repository yet
+pending an actual deployment to screenshot. Paths below are where they'll
+land once captured; see [`docs/loom-script.md`](docs/loom-script.md) for
+the walkthrough these correspond to.
+
+![Lead capture form — dark navy and electric blue themed intake form with name, email, company, revenue band, and biggest-challenge fields, with a signal-rail completion meter at the top](docs/screenshots/lead-capture-form.png)
+*Lead capture form, mid-fill — the signal-rail meter at the top tracks real required-field completion.*
+
+![Qualification success page — confirms submission and shows a Calendly booking CTA for a qualified lead](docs/screenshots/success-page.png)
+*Success page for a qualified lead, with the booking CTA.*
+
+![Google Sheets CRM view — a row showing a lead's full intake data, AI qualification score and status, and booking status](docs/screenshots/google-sheets-crm.png)
+*A lead record in the Google Sheets CRM — intake data, qualification score/status, and booking status in one row.*
+
+![n8n workflow canvas — three branches for qualified, maybe-qualified, and not-qualified leads, plus the separate Calendly booking webhook trigger](docs/screenshots/n8n-workflow-overview.png)
+*The n8n workflow canvas — three qualification branches plus the Calendly booking-webhook trigger.*
+
+![Founder notification email — internal alert showing lead name, company, AI score, qualification status, and recommended next step](docs/screenshots/founder-notification-email.png)
+*Founder notification email — score, status, and next step at a glance.*

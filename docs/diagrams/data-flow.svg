@@ -1,0 +1,124 @@
+<svg viewBox="0 0 1100 1678" width="1100" height="1678" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>RelayOps — Data Flow: One Lead's Journey</title>
+  <rect width="1100" height="1678" fill="#0A0E17"/>
+  <defs>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2F6FF0"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-bright" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5B8DFF"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8B94B0"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-success" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#34D399"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-warning" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#FBBF24"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-destructive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#E2574C"/>
+    </marker>
+  </defs>
+  <text x="550.0" y="36" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#5B8DFF" text-anchor="middle" letter-spacing="1.2px">RELAYOPS — DATA FLOW: ONE LEAD'S JOURNEY</text>
+  <text x="550.0" y="58" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#8B94B0" text-anchor="middle">From form submission to a booked (or declined) call</text>
+  <rect x="260.0" y="90" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="90" width="580" height="4" rx="2" fill="#2F6FF0"/>
+  <text x="276.0" y="118" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">1. Form Submit (Client)</text>
+  <text x="276.0" y="138" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Browser → POST /api/leads</text>
+  <text x="276.0" y="154" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">react-hook-form values, JSON body</text>
+  <path d="M 550.0 168 L 550.0 228" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="228" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="228" width="580" height="4" rx="2" fill="#2F6FF0"/>
+  <text x="276.0" y="256" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">2. Zod Validation</text>
+  <text x="276.0" y="276" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">leadFormSchema — identical schema on client</text>
+  <text x="276.0" y="292" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">and server (lib/validation/lead-schema.ts)</text>
+  <path d="M 550.0 306 L 550.0 366" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="366" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="366" width="580" height="4" rx="2" fill="#2F6FF0"/>
+  <text x="276.0" y="394" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">3. Gemini Qualification</text>
+  <text x="276.0" y="414" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Structured-output JSON schema → score (1–10),</text>
+  <text x="276.0" y="430" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">status, confidence, recommendedNextStep</text>
+  <text x="550.0" y="484" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="middle" letter-spacing="1px">BRANCH ON qualification.status</text>
+  <path d="M 550.0 444 L 200.0 504" fill="none" stroke="#34D399" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="40.0" y="504" width="320" height="100" rx="10" fill="#161D33" stroke="#34D399" stroke-width="1.5"/>
+  <text x="56.0" y="530" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="13" font-weight="700" fill="#34D399" text-anchor="start">QUALIFIED</text>
+  <text x="56.0" y="550" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">Calendly link built</text>
+  <text x="56.0" y="565" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">(buildBookingLink)</text>
+  <path d="M 550.0 444 L 550.0 504" fill="none" stroke="#FBBF24" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="390.0" y="504" width="320" height="100" rx="10" fill="#161D33" stroke="#FBBF24" stroke-width="1.5"/>
+  <text x="406.0" y="530" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="13" font-weight="700" fill="#FBBF24" text-anchor="start">MAYBE_QUALIFIED</text>
+  <text x="406.0" y="550" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">No booking link;</text>
+  <text x="406.0" y="565" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">routed to review queue</text>
+  <path d="M 550.0 444 L 900.0 504" fill="none" stroke="#E2574C" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="740.0" y="504" width="320" height="100" rx="10" fill="#161D33" stroke="#E2574C" stroke-width="1.5"/>
+  <text x="756.0" y="530" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="13" font-weight="700" fill="#E2574C" text-anchor="start">NOT_QUALIFIED</text>
+  <text x="756.0" y="550" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">No booking link;</text>
+  <text x="756.0" y="565" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">respectful decline</text>
+  <text x="550.0" y="648" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="middle" letter-spacing="1px">ALL BRANCHES CONVERGE</text>
+  <path d="M 200.0 604 L 550.0 664" fill="none" stroke="#34D399" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <path d="M 550.0 604 L 550.0 664" fill="none" stroke="#FBBF24" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <path d="M 900.0 604 L 550.0 664" fill="none" stroke="#E2574C" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="664" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="664" width="580" height="4" rx="2" fill="#5B8DFF"/>
+  <text x="276.0" y="692" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">4. Google Sheets CRM Write</text>
+  <text x="276.0" y="712" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">getCrmAdapter().createRecord() — full lead +</text>
+  <text x="276.0" y="728" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">qualification + booking status, one row</text>
+  <path d="M 550.0 742 L 550.0 802" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="802" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <rect x="260.0" y="802" width="580" height="4" rx="2" fill="#5B8DFF"/>
+  <text x="276.0" y="830" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">5. Email Sends</text>
+  <text x="276.0" y="850" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Lead email (status-specific) + founder</text>
+  <text x="276.0" y="866" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">notification — each in its own try/catch</text>
+  <text x="826.0" y="820" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="10.5" font-weight="600" fill="#FBBF24" text-anchor="end" letter-spacing="0.8px">NON-BLOCKING</text>
+  <path d="M 550.0 880 L 550.0 940" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="940" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <rect x="260.0" y="940" width="580" height="4" rx="2" fill="#5B8DFF"/>
+  <text x="276.0" y="968" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">6. n8n Webhook Fired</text>
+  <text x="276.0" y="988" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">POST to N8N_WEBHOOK_URL if configured —</text>
+  <text x="276.0" y="1004" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">fire-and-forget, only if set</text>
+  <text x="826.0" y="958" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="10.5" font-weight="600" fill="#FBBF24" text-anchor="end" letter-spacing="0.8px">NON-BLOCKING</text>
+  <path d="M 550.0 1018 L 550.0 1078" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="1078" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="1078" width="580" height="4" rx="2" fill="#34D399"/>
+  <text x="276.0" y="1106" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">7. n8n Branches By Status</text>
+  <text x="276.0" y="1126" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Task creation / nurture+review queue / archive —</text>
+  <text x="276.0" y="1142" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">see architecture.svg for full branch detail</text>
+  <text x="550.0" y="1186" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#8B94B0" text-anchor="middle" letter-spacing="0.8px">⋮  DAYS LATER — LEAD ACTUALLY BOOKS OR CANCELS  ⋮</text>
+  <path d="M 260.0 1200 L 840.0 1200" stroke="#232B45" stroke-width="1.5" stroke-dasharray="4,6"/>
+  <path d="M 550.0 1156 L 550.0 1244" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="1244" width="580" height="78" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="1244" width="580" height="4" rx="2" fill="#FBBF24"/>
+  <text x="276.0" y="1272" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">8. Calendly Fires Event</text>
+  <text x="276.0" y="1292" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">invitee.created / invitee.canceled /</text>
+  <text x="276.0" y="1308" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">invitee_no_show.created</text>
+  <text x="550.0" y="1366" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="middle" letter-spacing="0.6px">TWO PATHS — A REAL DEPLOYMENT USES ONE, NOT BOTH</text>
+  <path d="M 550.0 1322 L 320.0 1382" fill="none" stroke="#34D399" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="110.0" y="1382" width="420" height="90" rx="10" fill="#161D33" stroke="#34D399" stroke-width="1.5"/>
+  <text x="126.0" y="1408" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="13" font-weight="700" fill="#34D399" text-anchor="start">Via n8n</text>
+  <text x="126.0" y="1428" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">Calendly → n8n trigger → Verify</text>
+  <text x="126.0" y="1443" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">Calendly Signature → /api/webhooks/n8n</text>
+  <path d="M 550.0 1322 L 780.0 1382" fill="none" stroke="#5B8DFF" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="570.0" y="1382" width="420" height="90" rx="10" fill="#161D33" stroke="#5B8DFF" stroke-width="1.5"/>
+  <text x="586.0" y="1408" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="13" font-weight="700" fill="#5B8DFF" text-anchor="start">Direct</text>
+  <text x="586.0" y="1428" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">Calendly → /api/webhooks/calendly</text>
+  <text x="586.0" y="1443" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8B94B0" text-anchor="start">(HMAC-verified, no n8n required)</text>
+  <path d="M 320.0 1472 L 550.0 1532" fill="none" stroke="#34D399" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <path d="M 780.0 1472 L 550.0 1532" fill="none" stroke="#5B8DFF" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="260.0" y="1532" width="580" height="86" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="260.0" y="1532" width="580" height="4" rx="2" fill="#34D399"/>
+  <text x="276.0" y="1560" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">9. CRM Patched</text>
+  <text x="276.0" y="1580" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">bookingStatus updated ('booked' | 'cancelled' | 'no_show')</text>
+  <text x="276.0" y="1596" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">— 'booked' also flips the lead's overall status</text>
+</svg>

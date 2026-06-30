@@ -1,0 +1,122 @@
+<svg viewBox="0 0 1500 1110" width="1500" height="1110" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>RelayOps — System Architecture</title>
+  <rect width="1500" height="1110" fill="#0A0E17"/>
+  <defs>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2F6FF0"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-bright" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5B8DFF"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8B94B0"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="arrow-warning" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#FBBF24"/>
+    </marker>
+  </defs>
+  <text x="750.0" y="38" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#5B8DFF" text-anchor="middle" letter-spacing="1.5px">RELAYOPS — SYSTEM ARCHITECTURE</text>
+  <text x="750.0" y="62" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#8B94B0" text-anchor="middle">Lead Qualification &amp; Appointment Booking Automation</text>
+  <rect x="60" y="90" width="460" height="100" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="60" y="90" width="460" height="4" rx="2" fill="#2F6FF0"/>
+  <text x="76" y="118" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">Browser — Lead Capture Form</text>
+  <text x="76" y="138" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">User submits name, company, revenue band, biggest</text>
+  <text x="76" y="154" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">challenge, etc. — react-hook-form + zod</text>
+  <rect x="60" y="250" width="460" height="300" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="60" y="250" width="460" height="4" rx="2" fill="#5B8DFF"/>
+  <text x="76" y="278" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">Next.js App</text>
+  <rect x="80" y="302" width="420" height="46" rx="6" fill="#161D33" stroke="#232B45" stroke-width="1.5"/>
+  <text x="92" y="320" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="12.5" font-weight="600" fill="#5B8DFF" text-anchor="start">POST /api/leads</text>
+  <text x="92" y="336" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">validate → qualify → CRM write → email → n8n</text>
+  <rect x="80" y="356" width="420" height="46" rx="6" fill="#161D33" stroke="#232B45" stroke-width="1.5"/>
+  <text x="92" y="374" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="12.5" font-weight="600" fill="#5B8DFF" text-anchor="start">POST /api/webhooks/n8n</text>
+  <text x="92" y="390" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">patches CRM bookingStatus from n8n</text>
+  <rect x="80" y="410" width="420" height="46" rx="6" fill="#161D33" stroke="#232B45" stroke-width="1.5"/>
+  <text x="92" y="428" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="12.5" font-weight="600" fill="#5B8DFF" text-anchor="start">POST /api/webhooks/calendly</text>
+  <text x="92" y="444" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">direct booking path, HMAC-verified</text>
+  <text x="80" y="478" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">Non-blocking after CRM write: email sends, n8n webhook</text>
+  <rect x="600" y="250" width="320" height="120" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="600" y="250" width="320" height="4" rx="2" fill="#2F6FF0"/>
+  <text x="616" y="278" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">Gemini AI</text>
+  <text x="616" y="298" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Structured-output JSON schema</text>
+  <text x="616" y="314" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">→ score, status, confidence, next step</text>
+  <rect x="600" y="400" width="320" height="120" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="600" y="400" width="320" height="4" rx="2" fill="#5B8DFF"/>
+  <text x="616" y="428" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">Google Sheets (CRM)</text>
+  <text x="616" y="448" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Default CrmAdapter implementation</text>
+  <text x="616" y="464" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Provisions its own "Leads" tab on first use</text>
+  <text x="906" y="420" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="10.5" font-weight="600" fill="#5B8DFF" text-anchor="end" letter-spacing="0.8px">SWAPPABLE</text>
+  <text x="906" y="432" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="9.5" font-weight="400" fill="#8B94B0" text-anchor="end">via CrmAdapter</text>
+  <rect x="600" y="550" width="320" height="120" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="600" y="550" width="320" height="4" rx="2" fill="#5B8DFF"/>
+  <text x="616" y="578" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">Gmail SMTP (Email)</text>
+  <text x="616" y="598" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Lead email (qualified/maybe/not) +</text>
+  <text x="616" y="614" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">founder notification — both non-blocking</text>
+  <text x="906" y="570" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="10.5" font-weight="600" fill="#5B8DFF" text-anchor="end" letter-spacing="0.8px">SWAPPABLE</text>
+  <text x="906" y="582" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="9.5" font-weight="400" fill="#8B94B0" text-anchor="end">via EmailProvider</text>
+  <rect x="600" y="700" width="320" height="140" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="600" y="700" width="320" height="4" rx="2" fill="#FBBF24"/>
+  <text x="616" y="728" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">Calendly</text>
+  <text x="616" y="748" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Booking link issued for qualified leads</text>
+  <text x="616" y="764" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">Fires invitee.created / .canceled /</text>
+  <text x="616" y="780" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8B94B0" text-anchor="start">invitee_no_show.created on two paths →</text>
+  <rect x="60" y="900" width="860" height="170" rx="10" fill="#11172A" stroke="#232B45" stroke-width="1.5"/>
+  <rect x="60" y="900" width="860" height="4" rx="2" fill="#34D399"/>
+  <text x="76" y="928" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#F1F4FB" text-anchor="start">n8n Workflow</text>
+  <text x="76" y="944" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#8B94B0" text-anchor="start">Branches on qualification.status:</text>
+  <rect x="80" y="962" width="260" height="82" rx="6" fill="#161D33" stroke="#34D399" stroke-width="1.5"/>
+  <text x="92" y="982" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="700" fill="#34D399" text-anchor="start">QUALIFIED</text>
+  <text x="92" y="1000" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">Internal task created;</text>
+  <text x="92" y="1014" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">booking link logged</text>
+  <rect x="360" y="962" width="260" height="82" rx="6" fill="#161D33" stroke="#FBBF24" stroke-width="1.5"/>
+  <text x="372" y="982" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="700" fill="#FBBF24" text-anchor="start">MAYBE_QUALIFIED</text>
+  <text x="372" y="1000" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">Nurture + manual review</text>
+  <text x="372" y="1014" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">queue; 2-day follow-up</text>
+  <rect x="640" y="962" width="260" height="82" rx="6" fill="#161D33" stroke="#E2574C" stroke-width="1.5"/>
+  <text x="652" y="982" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="700" fill="#E2574C" text-anchor="start">NOT_QUALIFIED</text>
+  <text x="652" y="1000" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">Archive (often redundant —</text>
+  <text x="652" y="1014" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#8B94B0" text-anchor="start">CRM already reflects it)</text>
+  <rect x="1000" y="250" width="440" height="160" rx="10" fill="#161D33" stroke="#232B45" stroke-width="1.5"/>
+  <text x="1016" y="276" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="12" font-weight="600" fill="#5B8DFF" text-anchor="start" letter-spacing="1.2px">LEGEND</text>
+  <rect x="1016" y="290" width="18" height="10" rx="2" fill="#2F6FF0" stroke="#2F6FF0" stroke-width="1.5"/>
+  <text x="1044" y="300" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#F1F4FB" text-anchor="start">Core request/response flow</text>
+  <rect x="1016" y="316" width="18" height="10" rx="2" fill="#5B8DFF" stroke="#5B8DFF" stroke-width="1.5"/>
+  <text x="1044" y="326" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#F1F4FB" text-anchor="start">Adapter-based, swappable component</text>
+  <rect x="1016" y="342" width="18" height="10" rx="2" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
+  <text x="1044" y="352" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#F1F4FB" text-anchor="start">Webhook / async callback path</text>
+  <rect x="1016" y="368" width="18" height="10" rx="2" fill="#8B94B0" stroke="#8B94B0" stroke-width="1.5"/>
+  <text x="1044" y="378" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#F1F4FB" text-anchor="start">Dashed = alternate path (direct vs. via n8n)</text>
+  <path d="M 290 190 L 290 250" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="328.0" y="210" width="104.0" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="380" y="222" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#5B8DFF" text-anchor="middle">POST /api/leads</text>
+  <path d="M 520 290 Q 560 240 600 255" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="472.8" y="210" width="174.4" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="560" y="222" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#5B8DFF" text-anchor="middle">qualify() → score + status</text>
+  <path d="M 520 380 Q 560 400 600 440" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="542.2" y="378" width="65.6" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="575" y="390" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#5B8DFF" text-anchor="middle">CRM write</text>
+  <path d="M 520 460 Q 555 520 600 590" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="509.0" y="521" width="72.0" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="545" y="533" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#5B8DFF" text-anchor="middle">send email</text>
+  <path d="M 520 510 Q 550 640 600 760" fill="none" stroke="#FBBF24" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="444.2" y="648" width="161.60000000000002" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="525" y="660" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#FBBF24" text-anchor="middle">booking link (qualified)</text>
+  <path d="M 350 550 L 350 900" fill="none" stroke="#2F6FF0" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="281.2" y="718" width="97.60000000000001" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="330" y="730" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#5B8DFF" text-anchor="middle">lead webhook →</text>
+  <path d="M 460 900 L 460 550" fill="none" stroke="#5B8DFF" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="434.8" y="718" width="110.4" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="490" y="730" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#5B8DFF" text-anchor="middle">← booking status</text>
+  <path d="M 760 840 L 760 900" fill="none" stroke="#FBBF24" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <rect x="774.4" y="858" width="91.2" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="820" y="870" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#FBBF24" text-anchor="middle">webhook → n8n</text>
+  <path d="M 600 730 Q 380 480 520 320" fill="none" stroke="#8B94B0" stroke-width="2" marker-end="url(#arrow-muted)" stroke-dasharray="6,5"/>
+  <rect x="332.8" y="548" width="174.4" height="16" fill="#0A0E17" opacity="0.85"/>
+  <text x="420" y="560" font-family="'JetBrains Mono', 'Courier New', ui-monospace, monospace" font-size="11.5" font-weight="400" fill="#8B94B0" text-anchor="middle">direct webhook (alt. path)</text>
+</svg>
